@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artisan Command</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .code-container {
+            position: relative;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow-x: auto;
+            position: relative;
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            color: #333;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .copy-btn:hover {
+            background-color: #0056b3;
+        }
+        .copy-btn:active {
+            background-color: #003f7f;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Artisan Command</h1>
+    <p>By: Gio Dela Peña:</p>
+        <button class="copy-btn" onclick="copyCode()">Copy</button>
+    <div class="code-container">
+        <pre>
+<code id="code-block">
+use Illuminate\Support\Facades\File;
+
+
+Artisan::command('make:service-impl-controller {param}', function ($param) {
+    $serviceInterfaceDirectory = app_path("Http/Src/v1/Controllers");
+    $serviceInterfacePath = "{$serviceInterfaceDirectory}/Controller.php";
+
+    if (!File::exists($serviceInterfaceDirectory)) {
+        File::makeDirectory($serviceInterfaceDirectory, 0755, true);
+
+        $serviceInterfaceContent = "&lt;?php\n\n";
+        $serviceInterfaceContent .= "namespace App\Http\Src\\v1\Controllers;\n\n";
+        $serviceInterfaceContent .= "use App\Http\Src\\v1\Services\\{$param}Service;\n\n";
+        $serviceInterfaceContent .= "use Illuminate\Foundation\Auth\Access\AuthorizesRequests;\n";
+        $serviceInterfaceContent .= "use Illuminate\Foundation\Validation\ValidatesRequests;\n";
+        $serviceInterfaceContent .= "use Illuminate\Routing\Controller as BaseController;\n\n";
+        $serviceInterfaceContent .= "class Controller extends BaseController\n";
+        $serviceInterfaceContent .= "{\n";
+        $serviceInterfaceContent .= "    use AuthorizesRequests, ValidatesRequests;\n";
+        $serviceInterfaceContent .= "}\n";
+        File::put($serviceInterfacePath, $serviceInterfaceContent);
+
+        $this->info("Base Controller generated successfully: {$serviceInterfacePath}");
+    }
+
+
+    $serviceInterfaceDirectory = app_path("Http/Src/v1/Controllers");
+    $serviceInterfacePath = "{$serviceInterfaceDirectory}/{$param}Controller.php";
+
+    if (!File::exists($serviceInterfaceDirectory)) {
+        File::makeDirectory($serviceInterfaceDirectory, 0755, true);
+    }
+
+    $injection = '$'.strtolower($param);
+
+    $serviceInterfaceContent = "&lt;?php\nnamespace App\Http\Src\\v1\Controllers;\n\n";
+    $serviceInterfaceContent .= "use App\Http\Src\\v1\Services\\{$param}Service;\n";
+    $serviceInterfaceContent .= "use App\Http\Src\\v1\Controllers\Controller;\n";
+    $serviceInterfaceContent .= "class {$param}Controller extends Controller\n";
+    $serviceInterfaceContent .= "{\n";
+    $serviceInterfaceContent .= "    public function __construct(public {$param}Service {$injection}Service){\n";
+    $serviceInterfaceContent .= "       \n";
+    $serviceInterfaceContent .= "    }\n\n";
+    $serviceInterfaceContent .= "    public function exampleMethod(){\n";
+    $serviceInterfaceContent .= "       return $ this->{$injection}Service->exampleMethod();\n";
+    $serviceInterfaceContent .= "    }\n";
+    $serviceInterfaceContent .= "}\n";
+    File::put($serviceInterfacePath, $serviceInterfaceContent);
+
+    $this->info("Controller generated successfully: {$serviceInterfacePath}");
+
+
+    $serviceInterfaceDirectory = app_path("Http/Src/v1/Services");
+    $serviceInterfacePath = "{$serviceInterfaceDirectory}/{$param}Service.php";
+
+    if (!File::exists($serviceInterfaceDirectory)) {
+        File::makeDirectory($serviceInterfaceDirectory, 0755, true);
+    }
+
+    $serviceInterfaceContent = "&lt;?php\n\nnamespace App\Http\Src\\v1\Services;\n\ninterface {$param}Service\n{\n";
+    $serviceInterfaceContent .= "    public function exampleMethod();\n";
+    $serviceInterfaceContent .= "}\n";
+    File::put($serviceInterfacePath, $serviceInterfaceContent);
+
+    $this->info("Service interface generated successfully: {$serviceInterfacePath}");
+
+
+    $serviceInterfaceDirectory = app_path("Http/Src/v1/Implementations");
+    $serviceInterfacePath = "{$serviceInterfaceDirectory}/{$param}ServiceImpl.php";
+
+    if (!File::exists($serviceInterfaceDirectory)) {
+        File::makeDirectory($serviceInterfaceDirectory, 0755, true);
+    }
+
+    $serviceInterfaceContent = "&lt;?php\n\nnamespace App\Http\Src\\v1\Implementations;\n\n\nuse App\Http\Src\\v1\Services\\{$param}Service;\n\nClass {$param}ServiceImpl implements {$param}Service\n{\n";
+    $serviceInterfaceContent .= "    public function exampleMethod(){\n";
+    $serviceInterfaceContent .= "       try{\n\n";
+    $serviceInterfaceContent .= "       }\n";
+    $serviceInterfaceContent .= "       catch (\Exception $ error) {\n";
+    $serviceInterfaceContent .= "           return response()->json([\n";
+    $serviceInterfaceContent .= "               'success' => false,\n";
+    $serviceInterfaceContent .= "               'message' => $ error->getMessage()\n";
+    $serviceInterfaceContent .= "           ], 500);\n";
+    $serviceInterfaceContent .= "       }\n";
+    $serviceInterfaceContent .= "    }\n";
+    $serviceInterfaceContent .= "}\n";
+    File::put($serviceInterfacePath, $serviceInterfaceContent);
+
+    $this->info("Service Implementation generated successfully: {$serviceInterfacePath}");
+});
+</code>
+        </pre>
+    </div>
+
+    <script>
+        function copyCode() {
+            const codeBlock = document.getElementById('code-block').innerText;
+            navigator.clipboard.writeText(codeBlock).then(() => {
+                alert('Code copied to clipboard!');
+            }).catch(err => {
+                alert('Failed to copy code. Error: ' + err);
+            });
+        }
+    </script>
+</body>
+</html>
